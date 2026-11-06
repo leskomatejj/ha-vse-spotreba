@@ -14,7 +14,7 @@
         "description": "Vyber odberné miesto, ktoré chceš sledovať.",
         "data": {
           "vyber": "Odberné miesto",
-          "dni": "Počet dní histórie"
+          "rozsah": "Rozsah histórie"
         }
       },
       "om_rucne": {
@@ -25,7 +25,7 @@
           "om": "Číslo odberného miesta",
           "zu": "Číslo zmluvného účtu",
           "eic": "EIC kód (eicPodKod)",
-          "dni": "Počet dní histórie"
+          "rozsah": "Rozsah histórie"
         }
       }
     },
@@ -42,7 +42,7 @@
       "init": {
         "title": "Nastavenia VSE spotreby",
         "data": {
-          "dni": "Počet dní histórie na stiahnutie"
+          "rozsah": "Rozsah histórie"
         }
       }
     }

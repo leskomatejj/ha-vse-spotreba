@@ -14,7 +14,7 @@
         "description": "Select the metering point you want to track.",
         "data": {
           "vyber": "Metering point",
-          "dni": "Days of history"
+          "rozsah": "History range"
         }
       },
       "om_rucne": {
@@ -25,7 +25,7 @@
           "om": "Metering point number",
           "zu": "Contract account number",
           "eic": "EIC code (eicPodKod)",
-          "dni": "Days of history"
+          "rozsah": "History range"
         }
       }
     },
@@ -42,7 +42,7 @@
       "init": {
         "title": "VSE consumption settings",
         "data": {
-          "dni": "Days of history to download"
+          "rozsah": "History range"
         }
       }
     }

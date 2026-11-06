@@ -14,15 +14,16 @@ from homeassistant.core import callback
 
 from .api import VseAuthError, VseClient, VseError, op_z_tokenu
 from .const import (
-    CONF_DNI,
     CONF_EIC,
     CONF_EMAIL,
     CONF_OM,
     CONF_OP,
     CONF_PASSWORD,
+    CONF_ROZSAH,
     CONF_ZU,
-    DEFAULT_DNI,
+    DEFAULT_ROZSAH,
     DOMAIN,
+    ROZSAHY,
 )
 
 
@@ -88,14 +89,14 @@ class VseConfigFlow(ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             om = self._oms[int(user_input["vyber"])]
-            return await self._vytvor(om, user_input.get(CONF_DNI, DEFAULT_DNI))
+            return await self._vytvor(om, user_input.get(CONF_ROZSAH, DEFAULT_ROZSAH))
 
         options = {str(i): _popis_om(om) for i, om in enumerate(self._oms)}
         return self.async_show_form(
             step_id="om",
             data_schema=vol.Schema({
                 vol.Required("vyber", default="0"): vol.In(options),
-                vol.Optional(CONF_DNI, default=DEFAULT_DNI): int,
+                vol.Optional(CONF_ROZSAH, default=DEFAULT_ROZSAH): vol.In(ROZSAHY),
             }),
         )
 
@@ -112,7 +113,7 @@ class VseConfigFlow(ConfigFlow, domain=DOMAIN):
                     "cisloZmluvnehoUctu": user_input[CONF_ZU],
                     "eicPodKod": user_input[CONF_EIC],
                 },
-                user_input.get(CONF_DNI, DEFAULT_DNI),
+                user_input.get(CONF_ROZSAH, DEFAULT_ROZSAH),
             )
 
         return self.async_show_form(
@@ -122,11 +123,11 @@ class VseConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_OM): str,
                 vol.Required(CONF_ZU): str,
                 vol.Required(CONF_EIC): str,
-                vol.Optional(CONF_DNI, default=DEFAULT_DNI): int,
+                vol.Optional(CONF_ROZSAH, default=DEFAULT_ROZSAH): vol.In(ROZSAHY),
             }),
         )
 
-    async def _vytvor(self, om: dict, dni: int) -> ConfigFlowResult:
+    async def _vytvor(self, om: dict, rozsah: str) -> ConfigFlowResult:
         op = om.get("cisloObchodnehoPartnera") or om.get(CONF_OP) or self._op
         om_cislo = om.get("cisloOdbernehoMiesta") or om.get(CONF_OM)
         await self.async_set_unique_id(f"{op}_{om_cislo}")
@@ -140,7 +141,7 @@ class VseConfigFlow(ConfigFlow, domain=DOMAIN):
                 CONF_OM: om_cislo,
                 CONF_ZU: om.get("cisloZmluvnehoUctu") or om.get(CONF_ZU),
                 CONF_EIC: om.get("eicPodKod") or om.get(CONF_EIC),
-                CONF_DNI: dni,
+                CONF_ROZSAH: rozsah,
             },
         )
 
@@ -151,7 +152,7 @@ class VseConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class VseOptionsFlow(OptionsFlow):
-    """Nastavenie poctu stahovaných dni po instalacii."""
+    """Zmena rozsahu historie po instalacii."""
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -160,10 +161,10 @@ class VseOptionsFlow(OptionsFlow):
             return self.async_create_entry(data=user_input)
 
         current = self.config_entry.options.get(
-            CONF_DNI, self.config_entry.data.get(CONF_DNI, DEFAULT_DNI))
+            CONF_ROZSAH, self.config_entry.data.get(CONF_ROZSAH, DEFAULT_ROZSAH))
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema({
-                vol.Optional(CONF_DNI, default=current): int,
+                vol.Optional(CONF_ROZSAH, default=current): vol.In(ROZSAHY),
             }),
         )

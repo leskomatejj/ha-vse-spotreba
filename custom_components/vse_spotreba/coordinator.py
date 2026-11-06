@@ -17,10 +17,12 @@ from .const import (
     CONF_OM,
     CONF_OP,
     CONF_PASSWORD,
+    CONF_ROZSAH,
     CONF_ZU,
     DEFAULT_DNI,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    datum_od_pre_rozsah,
 )
 from .statistics import async_import_hodinove_statistiky
 
@@ -44,13 +46,27 @@ class VseCoordinator(DataUpdateCoordinator):
         self._om = data[CONF_OM]
         self._zu = data[CONF_ZU]
         self._eic = data[CONF_EIC]
-        self._dni = entry.options.get(CONF_DNI, data.get(CONF_DNI, DEFAULT_DNI))
+
+    def _rozsah(self) -> str | None:
+        """Aktualne nastaveny rozsah (options maju prednost pred data)."""
+        return self.entry.options.get(
+            CONF_ROZSAH, self.entry.data.get(CONF_ROZSAH))
+
+    def _datum_od(self, dnes: dt.date) -> dt.date:
+        """Vypocita datum 'od' podla rozsahu; fallback na stare 'dni'."""
+        rozsah = self._rozsah()
+        if rozsah:
+            return datum_od_pre_rozsah(rozsah, dnes)
+        dni = self.entry.options.get(
+            CONF_DNI, self.entry.data.get(CONF_DNI, DEFAULT_DNI))
+        return dnes - dt.timedelta(days=dni)
 
     def _fetch(self) -> dict:
         """Synchronna cast - bezi v executor vlakne."""
         token = self._client.login()
-        do = dt.date.today() + dt.timedelta(days=1)
-        od = do - dt.timedelta(days=self._dni + 1)
+        dnes = dt.date.today()
+        do = dnes + dt.timedelta(days=1)
+        od = self._datum_od(dnes) - dt.timedelta(days=1)
         return self._client.spotreba(
             token, self._op, self._om, self._zu, self._eic,
             od.isoformat(), do.isoformat())

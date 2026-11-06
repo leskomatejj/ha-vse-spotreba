@@ -38,6 +38,9 @@ Sprievodca má dva kroky:
    stačí si jedno vybrať zo zoznamu (adresa + typ). Ak by sa nič nenašlo,
    sprievodca ponúkne ručné zadanie identifikátorov.
 
+Rozsah histórie (7/30/90 dní, tento mesiac, 12 mesiacov) sa dá kedykoľvek
+zmeniť cez **Nastaviť** pri integrácii.
+
 ## Senzory
 
 | Entita | Popis | Jednotka |
