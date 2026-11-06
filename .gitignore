@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+vse_creds
+*.creds
+token
+*.token
+secret*
+.DS_Store

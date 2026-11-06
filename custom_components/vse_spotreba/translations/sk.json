@@ -1,0 +1,56 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Prihlásenie VSE",
+        "description": "Zadaj prihlasovacie údaje do portálu www.vse.sk (rovnaké ako na webe).",
+        "data": {
+          "email": "E-mail",
+          "password": "Heslo"
+        }
+      },
+      "om": {
+        "title": "Odberné miesto",
+        "description": "Vyber odberné miesto, ktoré chceš sledovať.",
+        "data": {
+          "vyber": "Odberné miesto",
+          "dni": "Počet dní histórie"
+        }
+      },
+      "om_rucne": {
+        "title": "Odberné miesto (ručne)",
+        "description": "Automatické načítanie nič nevrátilo. Zadaj identifikátory ručne (nájdeš ich v portáli VSE alebo na faktúre). Číslo obchodného partnera je predvyplnené.",
+        "data": {
+          "op": "Číslo obchodného partnera",
+          "om": "Číslo odberného miesta",
+          "zu": "Číslo zmluvného účtu",
+          "eic": "EIC kód (eicPodKod)",
+          "dni": "Počet dní histórie"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Nesprávny e-mail alebo heslo.",
+      "cannot_connect": "Nepodarilo sa spojiť s portálom VSE."
+    },
+    "abort": {
+      "already_configured": "Toto odberné miesto je už pridané."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Nastavenia VSE spotreby",
+        "data": {
+          "dni": "Počet dní histórie na stiahnutie"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "denna_spotreba": { "name": "Denná spotreba" },
+      "obdobie_spotreba": { "name": "Spotreba za obdobie" }
+    }
+  }
+}

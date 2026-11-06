@@ -1,0 +1,56 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "VSE sign-in",
+        "description": "Enter your www.vse.sk portal credentials (same as on the website).",
+        "data": {
+          "email": "E-mail",
+          "password": "Password"
+        }
+      },
+      "om": {
+        "title": "Metering point",
+        "description": "Select the metering point you want to track.",
+        "data": {
+          "vyber": "Metering point",
+          "dni": "Days of history"
+        }
+      },
+      "om_rucne": {
+        "title": "Metering point (manual)",
+        "description": "Auto-discovery returned nothing. Enter the identifiers manually (find them in the VSE portal or on your invoice). Business partner number is pre-filled.",
+        "data": {
+          "op": "Business partner number",
+          "om": "Metering point number",
+          "zu": "Contract account number",
+          "eic": "EIC code (eicPodKod)",
+          "dni": "Days of history"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid e-mail or password.",
+      "cannot_connect": "Could not connect to the VSE portal."
+    },
+    "abort": {
+      "already_configured": "This metering point is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "VSE consumption settings",
+        "data": {
+          "dni": "Days of history to download"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "denna_spotreba": { "name": "Daily consumption" },
+      "obdobie_spotreba": { "name": "Consumption for period" }
+    }
+  }
+}

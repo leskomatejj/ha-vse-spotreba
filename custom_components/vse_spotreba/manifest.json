@@ -1,0 +1,12 @@
+{
+  "domain": "vse_spotreba",
+  "name": "VSE spotreba",
+  "version": "0.3.0",
+  "documentation": "https://github.com/leskomatejj/ha-vse-spotreba",
+  "issue_tracker": "https://github.com/leskomatejj/ha-vse-spotreba/issues",
+  "codeowners": ["@leskomatejj"],
+  "config_flow": true,
+  "iot_class": "cloud_polling",
+  "integration_type": "hub",
+  "requirements": []
+}
