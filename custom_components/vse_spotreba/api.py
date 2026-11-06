@@ -59,14 +59,22 @@ class VseClient:
     def __init__(self, email: str, password: str) -> None:
         self._email = email
         self._password = password
-        self._opener = urllib.request.build_opener(
-            urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar())
-        )
+        # Opener NEVYTVARAME tu - build_opener() nacitava SSL certifikaty z disku
+        # (blokujuce). Vytvara sa lenivo az pri prvom volani, ktore bezi v
+        # executor vlakne (nie v HA event loope).
+        self._opener: urllib.request.OpenerDirector | None = None
 
     # --- nizkourovnove HTTP ---------------------------------------------
+    def _get_opener(self) -> urllib.request.OpenerDirector:
+        if self._opener is None:
+            self._opener = urllib.request.build_opener(
+                urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar())
+            )
+        return self._opener
+
     def _get(self, url: str, headers: dict | None = None) -> tuple[str, str]:
         req = urllib.request.Request(url, headers={"User-Agent": UA, **(headers or {})})
-        with self._opener.open(req, timeout=TIMEOUT) as r:
+        with self._get_opener().open(req, timeout=TIMEOUT) as r:
             return r.geturl(), r.read().decode("utf-8", "replace")
 
     def _post(self, url: str, body, headers: dict, as_json: bool = False) -> str:
@@ -76,7 +84,7 @@ class VseClient:
         req = urllib.request.Request(
             url, data=data, method="POST",
             headers={"User-Agent": UA, "Content-Type": ct, **(headers or {})})
-        with self._opener.open(req, timeout=TIMEOUT) as r:
+        with self._get_opener().open(req, timeout=TIMEOUT) as r:
             return r.read().decode("utf-8", "replace")
 
     # --- prihlasenie -----------------------------------------------------

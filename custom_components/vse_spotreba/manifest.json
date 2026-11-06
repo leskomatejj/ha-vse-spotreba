@@ -1,7 +1,7 @@
 {
   "domain": "vse_spotreba",
   "name": "VSE spotreba",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "documentation": "https://github.com/leskomatejj/ha-vse-spotreba",
   "issue_tracker": "https://github.com/leskomatejj/ha-vse-spotreba/issues",
   "codeowners": ["@leskomatejj"],
