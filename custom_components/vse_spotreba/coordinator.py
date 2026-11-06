@@ -136,11 +136,15 @@ class VseCoordinator(DataUpdateCoordinator):
         """Pozbieraj hodinovu spotrebu za cele okno a posli do statistik."""
         tz = await self.hass.async_add_executor_job(
             dt_util.get_time_zone, self.hass.config.time_zone)
-        teraz = dt_util.utcnow()
+        # len UPLNE dni (datum < dnesny lokalny datum) - dnesok este nema finalne
+        # data a statistiky su append-only, nulove hodiny by ostali natrvalo
+        dnes_local = dt_util.now().date().isoformat()
         hodiny_all = []
         for r in raw.get("spotrebyVcaseDetailHodina", []):
             kwh = cislo(r.get("kWh"))
             if kwh is None or not r.get("datum") or not r.get("cas"):
+                continue
+            if r["datum"] >= dnes_local:     # preskoc dnesok (necely den)
                 continue
             try:
                 naive = dt.datetime.strptime(
@@ -148,8 +152,6 @@ class VseCoordinator(DataUpdateCoordinator):
             except ValueError:
                 continue
             start = naive.replace(tzinfo=tz).astimezone(dt.timezone.utc)
-            if start >= teraz:          # preskoc buduce/necele hodiny
-                continue
             hodiny_all.append({"start": start, "kwh": kwh})
         hodiny_all.sort(key=lambda x: x["start"])
         await async_import_hodinove_statistiky(self.hass, self._om, hodiny_all)
