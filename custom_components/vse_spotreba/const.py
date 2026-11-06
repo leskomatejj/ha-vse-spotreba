@@ -20,6 +20,13 @@ DEFAULT_DNI = 14
 DEFAULT_ROZSAH = "30d"
 DEFAULT_SCAN_INTERVAL = timedelta(hours=1)
 
+# Hodinovy update stahuje len poslednych RECENT_DNI dni (historia sa nemeni);
+# cely 'rozsah' sa stiahne len raz pri backfille do statistik.
+RECENT_DNI = 14
+
+# kluc v hass.data: mnozina entry_id, ktore maju vynutit backfill (po zmene rozsahu)
+FORCE_BACKFILL = f"{DOMAIN}_force_backfill"
+
 # Moznosti rozsahu historie {kluc: popis pre UI}
 ROZSAHY = {
     "7d": "Posledných 7 dní",

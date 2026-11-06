@@ -24,6 +24,26 @@ from .const import DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 
+def _statistic_id(om: str) -> str:
+    return f"{DOMAIN}:spotreba_{om}"
+
+
+async def async_posledny_start(hass: HomeAssistant, om: str) -> dt.datetime | None:
+    """Vrati cas (UTC) poslednej ulozenej statistiky pre dane OM, alebo None."""
+    sid = _statistic_id(om)
+    last = await get_instance(hass).async_add_executor_job(
+        get_last_statistics, hass, 1, sid, True, {"start"}
+    )
+    rows = last.get(sid)
+    if not rows:
+        return None
+    ts = rows[0].get("start")
+    if ts is None:
+        return None
+    return (dt_util.utc_from_timestamp(ts) if isinstance(ts, (int, float))
+            else dt_util.as_utc(ts))
+
+
 async def async_import_hodinove_statistiky(
     hass: HomeAssistant, om: str, hodiny: list[dict]
 ) -> None:
@@ -35,7 +55,7 @@ async def async_import_hodinove_statistiky(
     if not hodiny:
         return
 
-    statistic_id = f"{DOMAIN}:spotreba_{om}"
+    statistic_id = _statistic_id(om)
     metadata: StatisticMetaData = {
         "has_mean": False,
         "has_sum": True,

@@ -4,7 +4,7 @@ from __future__ import annotations
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN
+from .const import DOMAIN, FORCE_BACKFILL
 from .coordinator import VseCoordinator
 
 PLATFORMS = ["sensor"]
@@ -30,5 +30,10 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 async def _async_reload(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Znovu nacitaj pri zmene nastaveni (options)."""
+    """Znovu nacitaj pri zmene nastaveni (options).
+
+    Zmena nastaveni (napr. vacsi rozsah) vynuti jednorazovy backfill, aby sa
+    doplnila aj staršia historia.
+    """
+    hass.data.setdefault(FORCE_BACKFILL, set()).add(entry.entry_id)
     await hass.config_entries.async_reload(entry.entry_id)

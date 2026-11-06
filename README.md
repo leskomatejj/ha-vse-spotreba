@@ -41,6 +41,11 @@ Sprievodca má dva kroky:
 Rozsah histórie (7/30/90 dní, tento mesiac, 12 mesiacov) sa dá kedykoľvek
 zmeniť cez **Nastaviť** pri integrácii.
 
+**Sťahovanie:** celý rozsah sa stiahne **len raz** (backfill do štatistík pri
+prvom spustení alebo po zmene rozsahu). Bežný hodinový update sťahuje len
+posledných ~14 dní — historické dáta sa už nemenia, tak nemá zmysel ťahať
+mesiace dozadu každú hodinu.
+
 ## Senzory
 
 | Entita | Popis | Jednotka |

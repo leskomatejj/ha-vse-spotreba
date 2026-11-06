@@ -22,9 +22,11 @@ from .const import (
     DEFAULT_DNI,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    FORCE_BACKFILL,
+    RECENT_DNI,
     datum_od_pre_rozsah,
 )
-from .statistics import async_import_hodinove_statistiky
+from .statistics import async_import_hodinove_statistiky, async_posledny_start
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -46,6 +48,7 @@ class VseCoordinator(DataUpdateCoordinator):
         self._om = data[CONF_OM]
         self._zu = data[CONF_ZU]
         self._eic = data[CONF_EIC]
+        self._backfill_hotovy = False   # backfill celeho rozsahu spravime raz
 
     def _rozsah(self) -> str | None:
         """Aktualne nastaveny rozsah (options maju prednost pred data)."""
@@ -61,29 +64,52 @@ class VseCoordinator(DataUpdateCoordinator):
             CONF_DNI, self.entry.data.get(CONF_DNI, DEFAULT_DNI))
         return dnes - dt.timedelta(days=dni)
 
-    def _fetch(self) -> dict:
+    def _fetch(self, od: dt.date, do: dt.date) -> dict:
         """Synchronna cast - bezi v executor vlakne."""
         token = self._client.login()
-        dnes = dt.date.today()
-        do = dnes + dt.timedelta(days=1)
-        od = self._datum_od(dnes) - dt.timedelta(days=1)
         return self._client.spotreba(
             token, self._op, self._om, self._zu, self._eic,
             od.isoformat(), do.isoformat())
 
     async def _async_update_data(self) -> dict:
+        dnes = dt.date.today()
+        do = dnes + dt.timedelta(days=1)
+
+        # Rozhodni, ci treba jednorazovy backfill celeho rozsahu, alebo staci
+        # lacny update poslednych dni (historia sa uz nemeni).
+        if not self._backfill_hotovy:
+            # vynuteny backfill po zmene rozsahu?
+            vynutene = self.hass.data.get(FORCE_BACKFILL, set())
+            force = self.entry.entry_id in vynutene
+            vynutene.discard(self.entry.entry_id)
+            posledny = await async_posledny_start(self.hass, self._om)
+            treba_backfill = (
+                force
+                or posledny is None
+                or posledny.date() < dnes - dt.timedelta(days=2))
+            if treba_backfill:
+                od = self._datum_od(dnes) - dt.timedelta(days=1)   # cely rozsah
+            else:
+                od = dnes - dt.timedelta(days=RECENT_DNI)           # uz mame historiu
+            self._backfill_hotovy = True
+        else:
+            od = dnes - dt.timedelta(days=RECENT_DNI)               # bezny hodinovy update
+
         try:
-            raw = await self.hass.async_add_executor_job(self._fetch)
+            raw = await self.hass.async_add_executor_job(self._fetch, od, do)
         except VseAuthError as err:
             raise UpdateFailed(f"Prihlasenie zlyhalo: {err}") from err
         except VseError as err:
             raise UpdateFailed(str(err)) from err
 
-        dnes = dt.date.today().isoformat()
+        # atribut 'dni' drzime kratky (poslednych RECENT_DNI dni) nezavisle od
+        # toho, ci slo o backfill - dlha historia je v Energy Dashboarde
+        dnes_s = dnes.isoformat()
+        hranica_s = (dnes - dt.timedelta(days=RECENT_DNI)).isoformat()
         dni = sorted(
             ({"datum": r["datum"], "kwh": cislo(r.get("kWh"))}
              for r in raw.get("spotrebyVcaseDetailDen", [])
-             if (r.get("kWh") or "").strip() and r["datum"] < dnes),
+             if (r.get("kWh") or "").strip() and hranica_s <= r["datum"] < dnes_s),
             key=lambda x: x["datum"])
         posledny = dni[-1] if dni else {"datum": None, "kwh": None}
 
