@@ -21,6 +21,15 @@ from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
 
+# HA 2026.11 vyzaduje 'mean_type' namiesto 'has_mean'. Importujeme defenzivne,
+# aby integracia fungovala aj na starsich verziach bez tohto enumu.
+try:
+    from homeassistant.components.recorder.models import StatisticMeanType
+
+    _MEAN_META = {"mean_type": StatisticMeanType.NONE}
+except ImportError:  # starsie HA
+    _MEAN_META = {"has_mean": False}
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -57,7 +66,7 @@ async def async_import_hodinove_statistiky(
 
     statistic_id = _statistic_id(om)
     metadata: StatisticMetaData = {
-        "has_mean": False,
+        **_MEAN_META,
         "has_sum": True,
         "name": f"VSE spotreba {om}",
         "source": DOMAIN,
